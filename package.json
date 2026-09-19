@@ -1,0 +1,24 @@
+{
+  "name": "tnc-backendexpress",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KayliAli/Tnc-BackendExpress.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/KayliAli/Tnc-BackendExpress/issues"
+  },
+  "homepage": "https://github.com/KayliAli/Tnc-BackendExpress#readme",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
