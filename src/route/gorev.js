@@ -13,11 +13,10 @@ router.post('/gorev', (req, res) => {
   const gorevler = dosyaOku(dosyaYolu, 'gorevler.json') || [];
   gorevler.push(req.body);
   dosyaYaz(dosyaYolu, gorevler);
-  logger.info('Görev eklendi');
   res.status(201).json({ mesaj: 'Görev eklendi', veri: req.body });
 });
 
-// Görev Listele Öncelikli - Get 
+// Görev Listele Öncelikli - Get ("düşük/orta/yüksek")
 router.get('/gorev/oncelik/:oncelik', (req, res) => {
   const gorevler = dosyaOku(dosyaYolu, 'gorevler.json') || [];
   const gorevlerByPriority = gorevler.filter(g => g.oncelik === req.params.oncelik);
@@ -27,8 +26,6 @@ router.get('/gorev/oncelik/:oncelik', (req, res) => {
 // Görev Listeleme - Get
 router.get('/gorev', (req, res) => {
   const gorevler = dosyaOku(dosyaYolu, 'gorevler.json') || [];
-  logger.
-
   
   res.status(200).json(gorevler);
 });
@@ -99,6 +96,49 @@ router.delete('/gorev/:id', (req, res) => {
   dosyaYaz(dosyaYolu, gorevler);
   res.status(200).send('Görev silindi');
 });
+
+// Duruma göre görevleri listeleme - Get
+router.get('/gorev?status=:durum', (req, res) => {
+  const gorevler = dosyaOku(dosyaYolu, 'gorevler.json') || [];
+  const durum = req.query.durum;
+  if (durum) {
+    const filtrelenmisGorevler = gorevler.filter(g => g.durum === durum);
+    return res.status(200).json(filtrelenmisGorevler);
+  }
+  else {
+    res.status(200).json(gorevler);
+  }
+});
+
+// Öncelik durumuna göre görevleri listeleme - Get
+router.get('/gorev?priority=:oncelik', (req, res) => {
+  const gorevler = dosyaOku(dosyaYolu, 'gorevler.json') || [];
+  const oncelik = req.query.oncelik;
+    if (oncelik) {
+    const filtrelenmisGorevler = gorevler.filter(g => g.oncelik === oncelik);
+    return res.status(200).json(filtrelenmisGorevler);
+  }
+   else {
+    res.status(200).json(gorevler);
+  }
+
+});
+
+
+// Görev Arama - Get
+router.get('/gorev/ara?key=:anahtar', (req, res) => {
+    const gorevler = dosyaOku(dosyaYolu, 'gorevler.json') || [];
+    const anahtar = req.query.anahtar;
+    if (anahtar) {
+        const filtrelenmisGorevler = gorevler.filter(g => g.baslik.includes(anahtar) || g.aciklama.includes(anahtar));
+        return res.status(200).json(filtrelenmisGorevler);
+    }
+    else {
+        // Görev Bulunamdı
+        res.status(404).json({ mesaj: 'Görev bulunamadı' });
+    }
+});
+
 
 module.exports = router;
 
