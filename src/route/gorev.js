@@ -95,7 +95,9 @@ router.delete('/gorev/:id', (req, res) => {
   gorevler.splice(gorevIndex, 1);
   dosyaYaz(dosyaYolu, gorevler);
   res.status(200).send('Görev silindi');
-});
+}); 
+
+/*---------------------------------------FİLİTRELEME/SIRALAMA-----------------------------*/
 
 // Duruma göre görevleri listeleme - Get
 router.get('/gorev?status=:durum', (req, res) => {
