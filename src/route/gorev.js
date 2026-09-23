@@ -16,20 +16,70 @@ router.post('/gorev', (req, res) => {
   res.status(201).json({ mesaj: 'Görev eklendi', veri: req.body });
 });
 
-// Görev Listele Öncelikli - Get ("düşük/orta/yüksek")
-router.get('/gorev/oncelik/:oncelik', (req, res) => {
-  const gorevler = dosyaOku(dosyaYolu, 'gorevler.json') || [];
-  const gorevlerByPriority = gorevler.filter(g => g.oncelik === req.params.oncelik);
-  res.status(200).json(gorevlerByPriority);
+// Görev Arama - Get
+router.get('/gorev/ara', (req, res) => {
+    const gorevler = dosyaOku(dosyaYolu, 'gorevler.json') || [];
+    const key = req.query.key; // ?key= kelimesini alır
+    
+    if (key) {
+        // null veya undefined olma ihtimaline karşı optional chaining (?) kullandık
+        const filtrelenmisGorevler = gorevler.filter(g => 
+            (g.gorev_adi && g.gorev_adi.includes(key)) || 
+            (g.gorev_detayi && g.gorev_detayi.includes(key))
+        );
+        return res.status(200).json(filtrelenmisGorevler);
+    } else {
+        return res.status(400).json({ mesaj: 'Arama için "key" parametresi eksik.' });
+    }
 });
 
-// Görev Listeleme - Get
+/* --------------------------------------------------------------------------
+   GÖREV LİSTELEME, FİLTRELEME, SIRALAMA VE SAYFALAMA
+-------------------------------------------------------------------------- */
 router.get('/gorev', (req, res) => {
-  const gorevler = dosyaOku(dosyaYolu, 'gorevler.json') || [];
+  let gorevler = dosyaOku(dosyaYolu, 'gorevler.json') || [];
   
+  // Gelen tüm query parametrelerini alıyoruz
+  const { status, priority, sirala, sayfa, limit } = req.query;
+
+  // 1. Duruma (status) Göre Filtreleme
+  if (status) {
+    gorevler = gorevler.filter(g => g.durum === status);
+  }
+
+  // 2. Önceliğe (priority) Göre Filtreleme
+  if (priority) {
+    gorevler = gorevler.filter(g => g.oncelik === priority);
+  }
+
+  // 3. Sıralama (sirala)
+  if (sirala) {
+    if (sirala === 'asc') {
+      gorevler = gorevler.sort((a, b) => a.gorev_adi.localeCompare(b.gorev_adi));
+    } else if (sirala === 'desc') {
+      gorevler = gorevler.sort((a, b) => b.gorev_adi.localeCompare(a.gorev_adi));
+    } else {
+      return res.status(400).json({ mesaj: 'Geçersiz sıralama. "asc" veya "desc" olmalı.' });
+    }
+  }
+
+  // 4. Sayfalama (sayfa ve limit)
+  if (sayfa || limit) {
+    const sayfaNo = parseInt(sayfa) || 1;
+    const limitNo = parseInt(limit) || 10;
+    const startIndex = (sayfaNo - 1) * limitNo;
+    const endIndex = startIndex + limitNo;
+    
+    gorevler = gorevler.slice(startIndex, endIndex);
+  }
+
+  // Tüm işlemlerden geçen veriyi döndür
   res.status(200).json(gorevler);
 });
 
+/* --------------------------------------------------------------------------
+   ID'YE BAĞLI İŞLEMLER
+-------------------------------------------------------------------------- */
 
 // Görev Detay - Get
 router.get('/gorev/:id', (req, res) => {
@@ -53,7 +103,7 @@ router.put('/gorev/:id', (req, res) => {
   }
   
   gorevler[gorevIndex] = { ...gorevler[gorevIndex], ...req.body };
-  dosyaYaz(dosyaYolu,gorevler);
+  dosyaYaz(dosyaYolu, gorevler);
   res.status(200).send('Görev güncellendi');
 });
 
@@ -82,7 +132,6 @@ router.patch('/gorev/:id/ata', (req, res) => {
   res.status(200).json({ mesaj: 'Görev başarıyla atandı.', gorev });
 });
 
-
 // Görev Silme - Delete
 router.delete('/gorev/:id', (req, res) => {
   const gorevler = dosyaOku(dosyaYolu, 'gorevler.json') || [];
@@ -97,50 +146,4 @@ router.delete('/gorev/:id', (req, res) => {
   res.status(200).send('Görev silindi');
 }); 
 
-/*---------------------------------------FİLİTRELEME/SIRALAMA-----------------------------*/
-
-// Duruma göre görevleri listeleme - Get
-router.get('/gorev?status=:durum', (req, res) => {
-  const gorevler = dosyaOku(dosyaYolu, 'gorevler.json') || [];
-  const durum = req.query.durum;
-  if (durum) {
-    const filtrelenmisGorevler = gorevler.filter(g => g.durum === durum);
-    return res.status(200).json(filtrelenmisGorevler);
-  }
-  else {
-    res.status(200).json(gorevler);
-  }
-});
-
-// Öncelik durumuna göre görevleri listeleme - Get
-router.get('/gorev?priority=:oncelik', (req, res) => {
-  const gorevler = dosyaOku(dosyaYolu, 'gorevler.json') || [];
-  const oncelik = req.query.oncelik;
-    if (oncelik) {
-    const filtrelenmisGorevler = gorevler.filter(g => g.oncelik === oncelik);
-    return res.status(200).json(filtrelenmisGorevler);
-  }
-   else {
-    res.status(200).json(gorevler);
-  }
-
-});
-
-
-// Görev Arama - Get
-router.get('/gorev/ara?key=:anahtar', (req, res) => {
-    const gorevler = dosyaOku(dosyaYolu, 'gorevler.json') || [];
-    const anahtar = req.query.anahtar;
-    if (anahtar) {
-        const filtrelenmisGorevler = gorevler.filter(g => g.baslik.includes(anahtar) || g.aciklama.includes(anahtar));
-        return res.status(200).json(filtrelenmisGorevler);
-    }
-    else {
-        // Görev Bulunamdı
-        res.status(404).json({ mesaj: 'Görev bulunamadı' });
-    }
-});
-
-
 module.exports = router;
-
