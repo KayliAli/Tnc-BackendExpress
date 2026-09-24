@@ -8,5 +8,6 @@ app.use(require('./middleware/logger'));
 // routes
 app.use(require('./route/gorev'));
 app.use(require('./route/calisan'));
+app.use(require('./route/rapor'));
 
 module.exports = app;
