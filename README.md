@@ -1,6 +1,6 @@
-# 📋Görev ve Proje Yönetim Sistemi API Geliştirme Projesi
+# 📋Görev ve Proje Yönetim Sistemi (API Geliştirme Projesi)
 
-Node.js ve Express.js kullanılarak geliştirilmiş, JSON dosya tabanlı, modüler mimariye sahip bir görev ve not yönetim REST API servisi.
+Node.js ve Express.js kullanılarak geliştirilmiş, JSON dosya tabanlı, modüler mimariye sahip bir görev ve proje yönetim REST API servisi.
 
 ---
 
@@ -30,9 +30,10 @@ proje-klasoru/
 └── package.json                  # Proje bağımlılıkları ve yapılandırma dosyası
 `````
 ### Katman Sorumlulukları
-* **`notlar.js` (Veri Erişim Katmanı):** `fs` ve `path` modüllerini kullanarak `data/notlar.json` dosyasını denetler, klasör/dosya yoksa otomatik üretir ve verileri senkron olarak okur/yazar.
-* **`routes/gorev.js` (Yönlendirme Katmanı):** `/gorev` altındaki HTTP isteklerini (`GET`, `POST`, `PUT`, `DELETE`) yöneten Express yönlendiricisidir.
 * **`app.js` (Uygulama Giriş Noktası):** `express.json()` gövde çözümleyicisini tanımlar, rotaları bağlar ve sunucuyu belirtilen port üzerinden dinlemeye alır.
+* **`dosya.js` (Veri Erişim Katmanı):** `fs` ve `path` modüllerini kullanarak `data/gorevler.json,data/calisanlar.json` dosyalarını denetler, klasör/dosya yoksa otomatik üretir ve verileri senkron olarak okur/yazar.
+* **`routes/gorev.js` (Yönlendirme Katmanı):** `/gorev` altındaki HTTP isteklerini (`GET`, `POST`, `PUT`, `DELETE`) yöneten Express yönlendiricisidir.
+
 
 ---
 
@@ -42,12 +43,12 @@ Temel URL: `http://localhost:3000/gorev`
 
 | Metot | Uç Nokta | Açıklama | Beklenen İstek Gövdesi |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/gorev` | Yeni bir görev kaydı oluşturur | `{ "gorev_adi": string, "aciklama": string }` |
+| `POST` | `/gorev` | Yeni bir görev kaydı oluşturur | `{ gorev_object }` |
 | `GET` | `/gorev` | Kayıtlı tüm görevleri listeler | *Yok* |
 | `GET` | `/gorev?status=durum&sirala=asc` | Görevleri filtreler, sıralar ve sayfalar | *Yok* |
 | `GET` | `/gorev/ara?key=backend` | Belirtilen kelimeye göre görev arar | *Yok* |
 | `GET` | `/gorev/:id` | Belirtilen ID'ye sahip görevi getirir | *Yok* |
-| `PUT` | `/gorev/:id` | Belirtilen ID'ye sahip görevi günceller | `{ "gorev_adi": string, "aciklama": string }` |
+| `PUT` | `/gorev/:id` | Belirtilen ID'ye sahip görevi günceller | `{ gorev_object }` |
 | `PATCH`| `/gorev/:id/ata` | Belirtilen ID'ye sahip göreve çalışan atar | `{ "calisan_id": 101 }` |
 | `DELETE`| `/gorev/:id` | Belirtilen ID'ye sahip görevi siler | *Yok* |
 
@@ -63,8 +64,12 @@ POST http://localhost:3000/gorev
 Content-Type: application/json
 
 {
-  "baslik": "Rapor Hazırlama",
-  "icerik": "Haftalık sprint raporu çıkarılacak."
+    "id": "<integer>",
+    "gorev_adi": "<string>",
+    "gorev_detayi": "<string>",
+    "durum": "<string> ('bekliyor' | 'devam ediyor' | 'tamamlandı')",
+    "oncelik": "<string> ('düşük' | 'orta' | 'yüksek')",
+    "calisan_id": "<integer>"
 }
 ```
 
@@ -80,8 +85,12 @@ POST http://localhost:3000/gorev
 Content-Type: application/json
 
 {
-  "baslik": "Rapor Hazırlama",
-  "icerik": "Haftalık sprint raporu çıkarılacak."
+    "id": "<integer>",
+    "gorev_adi": "<string>",
+    "gorev_detayi": "<string>",
+    "durum": "<string> ('bekliyor' | 'devam ediyor' | 'tamamlandı')",
+    "oncelik": "<string> ('düşük' | 'orta' | 'yüksek')",
+    "calisan_id": "<integer>"
 }
 ```
 
@@ -90,35 +99,34 @@ Content-Type: application/json
 
 ---
 
-## 📄 Veri Modeli (`data/gorevler.json`)
+## 📄 Veri Modelleri
 
-Kayıtlar dosya sisteminde JSON formatında şu şema ile saklanır:
-
-    [
-      {
-        "id": 1,
-        "baslik": "Market",
-        "icerik": "Süt, ekmek alınacak"
-      },
-      {
-        "id": 2,
-        "baslik": "Toplantı",
-        "icerik": "Pazartesi 10:00"
-      }
-    ]
+Kayıtlar dosya sisteminde JSON formatındaki bu örnek şemalar ile saklanır:
+# Görev veri modeli (`data/gorevler.json`)
+```http
+[
+  {
+    "id": 1,
+    "gorev_adi": "Kullanıcı Giriş Modülü",
+    "gorev_detayi": "JWT tabanlı kimlik doğrulama ve refresh token yapısının kurulması.",
+    "durum": "tamamlandı",
+    "oncelik": "yüksek",
+    "calisan_id": 101
+  }
+]
+```
 # Çalışan veri modeli ('data/calisanlar.json)
-    [
-      {
-        "id": 1,
-        "baslik": "Market",
-        "icerik": "Süt, ekmek alınacak"
-      },
-      {
-        "id": 2,
-        "baslik": "Toplantı",
-        "icerik": "Pazartesi 10:00"
-      }
-    ]
+```http
+[
+  {
+    "id": 101,
+    "ad_soyad": "Hakan Yılmaz",
+    "email": "hakan@example.com",
+    "departman": "Backend",
+    "unvan": "Node.js Geliştirici"
+  }
+]
+```
 
 ---
 
@@ -137,6 +145,11 @@ Projeyi yerel ortamınızda ayağa kaldırmak için aşağıdaki adımları uygu
 ### Gereksinimler
 * **Node.js** (v16.0.0 veya üzeri)
 * **npm** (v8.0.0 veya üzeri)
+#### İndirdiğiniz paketleri kontrol etmek için aşağıdaki komutları kullanabilirsiniz;
+```bash 
+       node --v
+       npm --v
+```   
 
 ### Adım 1: Bağımlılıkların Yüklenmesi
 Terminal üzerinden Express kütüphanesini kurun:  
