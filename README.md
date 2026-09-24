@@ -115,7 +115,7 @@ Kayıtlar dosya sisteminde JSON formatındaki bu örnek şemalar ile saklanır:
   }
 ]
 ```
-### Çalışan veri modeli ('data/calisanlar.json)
+### Çalışan veri modeli (`data/calisanlar.json`)
 ```http
 [
   {
