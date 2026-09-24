@@ -102,7 +102,7 @@ Content-Type: application/json
 ## 📄 Veri Modelleri
 
 Kayıtlar dosya sisteminde JSON formatındaki bu örnek şemalar ile saklanır:
-# Görev veri modeli (`data/gorevler.json`)
+### Görev veri modeli (`data/gorevler.json`)
 ```http
 [
   {
@@ -115,7 +115,7 @@ Kayıtlar dosya sisteminde JSON formatındaki bu örnek şemalar ile saklanır:
   }
 ]
 ```
-# Çalışan veri modeli ('data/calisanlar.json)
+### Çalışan veri modeli ('data/calisanlar.json)
 ```http
 [
   {
