@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const path = require('path');
+//Middleware
 const logger = require('../middleware/logger');
+const validateGorev = require('../middleware/validateGorev');
 
 const { dosyaOlustur, dosyaOku, dosyaYaz } = require('../utils/dosya');
 
@@ -9,7 +11,7 @@ const dosyaYolu = path.join(__dirname, '..', '..', 'data', 'gorevler.json');
 const calisanlarYolu = path.join(__dirname, '..', '..', 'data', 'calisanlar.json');
 
 // Görev Ekleme - Post
-router.post('/gorev', (req, res) => {
+router.post('/gorev', validateGorev, (req, res) => {
   const gorevler = dosyaOku(dosyaYolu, 'gorevler.json') || [];
   gorevler.push(req.body);
   dosyaYaz(dosyaYolu, gorevler);
@@ -94,7 +96,7 @@ router.get('/gorev/:id', (req, res) => {
 });
 
 // Görev Güncelleme - Put
-router.put('/gorev/:id', (req, res) => {
+router.put('/gorev/:id',validateGorev, (req, res) => {
   const gorevler = dosyaOku(dosyaYolu) || [];
   const gorevIndex = gorevler.findIndex(g => g.id === parseInt(req.params.id));
   
