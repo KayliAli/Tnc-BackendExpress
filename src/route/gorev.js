@@ -10,21 +10,31 @@ const { dosyaOlustur, dosyaOku, dosyaYaz } = require('../utils/dosya');
 const dosyaYolu = path.join(__dirname, '..', '..', 'data', 'gorevler.json');
 const calisanlarYolu = path.join(__dirname, '..', '..', 'data', 'calisanlar.json');
 
-// Görev Ekleme - Post
+// Görev Ekleme - Post (Otomatik ID eklendi)
 router.post('/gorev', validateGorev, (req, res) => {
   const gorevler = dosyaOku(dosyaYolu, 'gorevler.json') || [];
-  gorevler.push(req.body);
+  
+  // Otomatik ID hesaplama
+  const yeniId = gorevler.length > 0 ? Math.max(...gorevler.map(g => g.id || 0)) + 1 : 1;
+  
+  const yeniGorev = {
+    id: yeniId,
+    ...req.body,
+    calisan_id: req.body.calisan_id || null
+  };
+
+  gorevler.push(yeniGorev);
   dosyaYaz(dosyaYolu, gorevler);
-  res.status(201).json({ mesaj: 'Görev eklendi', veri: req.body });
+  
+  res.status(201).json({ mesaj: 'Görev eklendi', veri: yeniGorev });
 });
 
 // Görev Arama - Get
 router.get('/gorev/ara', (req, res) => {
     const gorevler = dosyaOku(dosyaYolu, 'gorevler.json') || [];
-    const key = req.query.key; // ?key= kelimesini alır
+    const key = req.query.key;
     
     if (key) {
-        // null veya undefined olma ihtimaline karşı optional chaining (?) kullandık
         const filtrelenmisGorevler = gorevler.filter(g => 
             (g.gorev_adi && g.gorev_adi.includes(key)) || 
             (g.gorev_detayi && g.gorev_detayi.includes(key))
@@ -41,20 +51,16 @@ router.get('/gorev/ara', (req, res) => {
 router.get('/gorev', (req, res) => {
   let gorevler = dosyaOku(dosyaYolu, 'gorevler.json') || [];
   
-  // Gelen tüm query parametrelerini alıyoruz
   const { status, priority, sirala, sayfa, limit } = req.query;
 
-  // 1. Duruma (status) Göre Filtreleme
   if (status) {
     gorevler = gorevler.filter(g => g.durum === status);
   }
 
-  // 2. Önceliğe (priority) Göre Filtreleme
   if (priority) {
     gorevler = gorevler.filter(g => g.oncelik === priority);
   }
 
-  // 3. Sıralama (sirala)
   if (sirala) {
     if (sirala === 'asc') {
       gorevler = gorevler.sort((a, b) => a.gorev_adi.localeCompare(b.gorev_adi));
@@ -65,7 +71,6 @@ router.get('/gorev', (req, res) => {
     }
   }
 
-  // 4. Sayfalama (sayfa ve limit)
   if (sayfa || limit) {
     const sayfaNo = parseInt(sayfa) || 1;
     const limitNo = parseInt(limit) || 10;
@@ -75,7 +80,6 @@ router.get('/gorev', (req, res) => {
     gorevler = gorevler.slice(startIndex, endIndex);
   }
 
-  // Tüm işlemlerden geçen veriyi döndür
   res.status(200).json(gorevler);
 });
 
@@ -89,24 +93,25 @@ router.get('/gorev/:id', (req, res) => {
   const gorev = gorevler.find(g => g.id === parseInt(req.params.id));
   
   if (!gorev) {
-    return res.status(404).send('Görev bulunamadı');
+    return res.status(404).json({ hata: 'Görev bulunamadı' });
   }
   
   res.status(200).json(gorev);
 });
 
 // Görev Güncelleme - Put
-router.put('/gorev/:id',validateGorev, (req, res) => {
+router.put('/gorev/:id', validateGorev, (req, res) => {
   const gorevler = dosyaOku(dosyaYolu) || [];
   const gorevIndex = gorevler.findIndex(g => g.id === parseInt(req.params.id));
   
   if (gorevIndex === -1) {
-    return res.status(404).send('Görev bulunamadı');
+    return res.status(404).json({ hata: 'Görev bulunamadı' });
   }
   
   gorevler[gorevIndex] = { ...gorevler[gorevIndex], ...req.body };
   dosyaYaz(dosyaYolu, gorevler);
-  res.status(200).send('Görev güncellendi');
+  
+  res.status(200).json({ mesaj: 'Görev güncellendi', veri: gorevler[gorevIndex] });
 });
 
 // Görev ATA - Patch
@@ -140,12 +145,13 @@ router.delete('/gorev/:id', (req, res) => {
   const gorevIndex = gorevler.findIndex(g => g.id === parseInt(req.params.id));
   
   if (gorevIndex === -1) {
-    return res.status(404).send('Görev bulunamadı');
+    return res.status(404).json({ hata: 'Görev bulunamadı' });
   }
   
   gorevler.splice(gorevIndex, 1);
   dosyaYaz(dosyaYolu, gorevler);
-  res.status(200).send('Görev silindi');
+  
+  res.status(200).json({ mesaj: 'Görev silindi' });
 }); 
 
 module.exports = router;
