@@ -170,8 +170,8 @@ Express sunucusunu aktif hale getirin:
 
 Projenin test süreçleri, endpoint detayları ve Postman ekran görüntülerini içeren profesyonel kullanım kılavuzlarına aşağıdaki bağlantılardan ulaşabilirsiniz:
 
-- 📄 [Detaylı API Test ve Kullanım Raporu (PDF)](docs/Detayli_API_Test_Raporu.pdf)
-- 📝 [Proje Tanıtım ve Mimari Dokümanı (Word)](./Proje_Tanitimi_Final.docx)
+- 📄 [Detaylı API Test ve Kullanım Raporu](docs/Detayli_API_Test_Raporu.pdf)
+- 📝 [Proje Tanıtım ve Mimari Dokümanı ](docs/Proje_Tanitimi.docx)
 
 
 ---
