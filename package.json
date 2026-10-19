@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/KayliAli/Tnc-BackendExpress#readme",
   "dependencies": {
+    "dotenv": "^18.0.8",
     "express": "^5.2.1"
   }
 }

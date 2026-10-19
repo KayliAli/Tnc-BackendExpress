@@ -18,8 +18,8 @@ router.post('/gorev', validateGorev, (req, res) => {
   const yeniId = gorevler.length > 0 ? Math.max(...gorevler.map(g => g.id || 0)) + 1 : 1;
   
   const yeniGorev = {
-    id: yeniId,
     ...req.body,
+    id: yeniId,
     calisan_id: req.body.calisan_id || null
   };
 

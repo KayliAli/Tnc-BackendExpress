@@ -15,8 +15,8 @@ router.post('/calisan', (req, res) => {
   const yeniId = calisanlar.length > 0 ? Math.max(...calisanlar.map(c => c.id || 0)) + 1 : 101;
   
   const yeniCalisan = {
-    id: yeniId,
-    ...req.body
+    ...req.body,
+    id: yeniId
   };
 
   calisanlar.push(yeniCalisan);
